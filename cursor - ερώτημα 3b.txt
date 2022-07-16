@@ -1,0 +1,45 @@
+-- Δημιουργία συνάρτησης που επιστρέφει έναν πίνακα
+CREATE OR REPLACE FUNCTION get_contracts (year1 int, year2 int)
+RETURNS TABLE (nr_of_contracts bigint,insurance_ctgr varchar(20),signed_in int) AS $$
+
+DECLARE
+-- Oρίζουμε μία μεταβλητή rec_contracts που αποθηκεύει ολόκληρες εγγραφές ενός πίνακα
+rec_contracts RECORD;
+
+-- Ορισμός του cursor
+cur_contracts CURSOR(year1 int,year2 int) FOR
+
+-- Χρησιμοποιούμε τον cursor με το query του ερωτήματος 2c
+SELECT COUNT(DISTINCT contracts.contract_code) AS number_of_contracts, contracts.insurance_category, EXTRACT (YEAR FROM contracts.start_date) AS contract_year
+FROM contracts
+WHERE EXTRACT (YEAR FROM contracts.start_date)>=year1 AND EXTRACT (YEAR FROM contracts.start_date)<=year2
+GROUP BY contracts.insurance_category,EXTRACT (YEAR FROM contracts.start_date);
+
+BEGIN
+-- Ανοίγουμε τον cursor, ώστε να γίνει λειτουργικός
+OPEN cur_contracts(year1,year2);
+
+LOOP
+
+-- Kάνουμε fetch τις γραμμές που επιστρέφει το ερώτημα
+FETCH cur_contracts INTO rec_contracts;
+
+-- Σταματάμε όταν δεν υπάρχουν άλλες γραμμές στο αποτέλεσμα του ερωτήματος
+EXIT WHEN NOT FOUND;
+
+-- Κατασκευή του αποτελέσματος σε μορφή πίνακα
+nr_of_contracts := rec_contracts.number_of_contracts;
+insurance_ctgr := rec_contracts.insurance_category;
+signed_in := rec_contracts.contract_year;
+RETURN NEXT;
+
+END LOOP;
+
+-- Αποδεσμεύουμε τον cursor
+CLOSE cur_contracts;
+END; $$
+
+LANGUAGE plpgsql;
+
+-- Ενεργοποίηση της παραπάνω συνάρτησης με ορίσματα 2016 και 2020
+SELECT * FROM get_contracts(2016,2020);

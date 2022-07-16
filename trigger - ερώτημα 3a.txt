@@ -1,0 +1,37 @@
+-- H συνάρτηση που θα εκτελεί το trigger
+CREATE OR REPLACE FUNCTION renew_contract_year() RETURNS TRIGGER AS 
+$$
+BEGIN
+		-- Έλεγχος για το αν η κατηγορία του συμβολαίου είναι 'professional'
+        IF OLD.insurance_category='professional' THEN
+			-- Ανανέωση του συμβολαίου κατά ένα χρόνο
+            NEW.end_date=CAST(NEW.end_date +interval '1 year' AS date);
+        END IF;
+        RETURN NEW;
+END;
+$$ LANGUAGE PLPGSQL;
+
+
+
+-- Trigger που θα εκτελέι την ανανέωση όλων των συμβολαίων στην κατηγορία 
+-- 'επαγγελματικό' κατά έναν χρόνο. H ανανέωση αυτή γίνεται μόνο όταν 
+-- κάνουμε UPDATE στον πίνακα contracts
+CREATE TRIGGER renew
+BEFORE UPDATE
+ON contracts
+FOR EACH ROW
+-- Ο trigger πυροδοτείται μόνο όταν η ημερομηνία λήξης του συμβολαίου 
+-- είναι η σημερινή (τρέχουσα)
+WHEN (old.end_date = CURRENT_DATE)
+EXECUTE PROCEDURE renew_contract_year();
+
+
+
+-- Χρησιμοποιούμε ένα UPDATE query για να δείξουμε ότι ενεργοποιείται το trigger
+UPDATE contracts SET contract_cost='42008' where contract_code='A087805'
+
+-- Xρησιμοποιούμε το παρακάτω ερώτημα για να προβάλλουμε την αλλαγή
+-- που επέφερε ο trigger στα δεδομένα, μετά το UPDATE
+SELECT *
+FROM contracts
+WHERE contract_code='A087805'
