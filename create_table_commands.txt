@@ -1,0 +1,131 @@
+-- Create the tables of the database
+
+DROP TABLE IF EXISTS infringements_clients;
+DROP TABLE IF EXISTS infringements_drivers;
+DROP TABLE IF EXISTS infringements_vehicles;
+DROP TABLE IF EXISTS clients;
+DROP TABLE IF EXISTS drivers;
+DROP TABLE IF EXISTS infringements;
+DROP TABLE IF EXISTS clients_info;
+DROP TABLE IF EXISTS drivers_info;
+DROP TABLE IF EXISTS vehicles;
+DROP TABLE IF EXISTS vehicle_models;
+DROP TABLE IF EXISTS contracts;
+
+CREATE TABLE Vehicle_Models
+(
+	model varchar(20) NOT NULL,
+	manufacturer varchar(20) NOT NULL,
+        category varchar(20) NOT NULL,
+	PRIMARY KEY (model)		
+);
+
+CREATE TABLE Infringements
+(
+	infringement_code varchar(20) NOT NULL,
+	infringement_date date NOT NULL,
+	description text NOT NULL,
+        infringement_time time without time zone NOT NULL,
+	PRIMARY KEY (infringement_code)
+);
+
+CREATE TABLE Contracts
+(
+	contract_code varchar(20) NOT NULL,
+	insurance_category varchar(20) NOT NULL,
+	start_date date NOT NULL,
+	end_date date NOT NULL,
+	contract_cost integer NOT NULL,
+	PRIMARY KEY (contract_code)
+);
+
+CREATE TABLE Clients_Info
+(
+	first_name varchar(20) NOT NULL,
+        last_name varchar(20) NOT NULL,
+	gender varchar(20) NOT NULL,
+	birth_date date NOT NULL,
+	license_number bigint NOT NULL,
+	phone_number1 varchar(20) NOT NULL,
+	phone_number2 varchar(20),
+	email varchar(30) NOT NULL UNIQUE,
+        street varchar(20) NOT NULL,
+        zip_code varchar(20) NOT NULL,
+        city varchar(20) NOT NULL,
+        country varchar(20) NOT NULL,
+	PRIMARY KEY (license_number)
+);
+
+CREATE TABLE Drivers_Info
+(
+    first_name varchar(20) NOT NULL,
+    last_name varchar(20) NOT NULL,
+    birth_date date NOT NULL,
+    street varchar(20) NOT NULL,
+    zip_code varchar(20) NOT NULL,
+    city varchar(20) NOT NULL,
+    country varchar(20) NOT NULL,
+    gender varchar(20) NOT NULL,
+    license_number bigint NOT NULL,
+    PRIMARY KEY (license_number)
+);
+
+CREATE TABLE Vehicles
+(
+    plate_number varchar(20) NOT NULL,
+    car_license_number varchar(20) NOT NULL UNIQUE,
+    model varchar(20) NOT NULL,
+    color varchar(20) NOT NULL,
+    first_year integer NOT NULL,
+    current_price integer NOT NULL,
+    contract_code varchar(20) NOT NULL UNIQUE,
+    PRIMARY KEY (plate_number),
+	FOREIGN KEY (model) references Vehicle_Models ON DELETE CASCADE,
+	FOREIGN KEY (contract_code) references Contracts ON DELETE CASCADE
+);
+
+CREATE TABLE Drivers
+(
+    contract_code varchar(20) NOT NULL,
+    license_number bigint NOT NULL,
+    PRIMARY KEY (contract_code, license_number),
+	FOREIGN KEY (contract_code) references Contracts ON DELETE CASCADE,
+	FOREIGN KEY (license_number) references Drivers_Info ON DELETE CASCADE
+);
+
+CREATE TABLE Infringements_Drivers
+(
+    infringement_code varchar(20) NOT NULL,
+    license_number bigint NOT NULL,
+    PRIMARY KEY (infringement_code, license_number),
+	FOREIGN KEY (infringement_code) references Infringements ON DELETE CASCADE,
+	FOREIGN KEY (license_number) references Drivers_Info ON DELETE CASCADE
+);
+
+CREATE TABLE Infringements_Vehicles
+(
+    infringement_code varchar(20) NOT NULL,
+    plate_number varchar(20) NOT NULL,
+    PRIMARY KEY (infringement_code, plate_number),
+	FOREIGN KEY (infringement_code) references Infringements ON DELETE CASCADE,
+	FOREIGN KEY (plate_number) references Vehicles ON DELETE CASCADE
+);
+
+CREATE TABLE Infringements_Clients
+(
+    infringement_code varchar(20) NOT NULL,
+    license_number bigint NOT NULL,
+    PRIMARY KEY (infringement_code, license_number),
+	FOREIGN KEY (infringement_code) references Infringements ON DELETE CASCADE,
+	FOREIGN KEY (license_number) references Clients_Info ON DELETE CASCADE
+);
+
+CREATE TABLE Clients
+(
+    license_number bigint NOT NULL,
+    contract_code varchar(20) NOT NULL,
+    "isDriver" boolean NOT NULL,
+    PRIMARY KEY (contract_code),
+	FOREIGN KEY (license_number) references Clients_Info ON DELETE CASCADE,
+	FOREIGN KEY (contract_code) references Contracts ON DELETE CASCADE
+);
