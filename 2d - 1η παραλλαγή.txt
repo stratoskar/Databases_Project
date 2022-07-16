@@ -1,0 +1,14 @@
+-- Ερώτημα 2d (Πρώτη παραλλαγή - σε απόλυτους αριθμούς)
+WITH sum_per_category (insurance_category,sum_cost) AS
+(
+SELECT insurance_category,SUM(contract_cost) AS sum_cost
+FROM contracts
+GROUP BY insurance_category
+)
+SELECT insurance_category,sum_cost
+FROM sum_per_category
+WHERE sum_cost IN
+    ( 
+        SELECT MAX(sum_cost)
+        FROM sum_per_category
+    )

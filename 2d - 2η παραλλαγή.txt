@@ -1,0 +1,14 @@
+-- Ερώτημα 2d (Δεύτερη παραλλαγή - με αναγωγή βάσει πλήθους συμβολαίων)
+WITH count_per_category (insurance_category,count_contracts) AS
+(
+SELECT insurance_category,COUNT(DISTINCT contract_code) AS count_contracts
+FROM contracts
+GROUP BY insurance_category
+)
+SELECT insurance_category,count_contracts
+FROM count_per_category
+WHERE count_contracts IN
+    ( 
+        SELECT MAX(count_contracts) 
+        FROM count_per_category
+    )

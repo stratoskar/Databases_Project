@@ -1,0 +1,46 @@
+-- Ερώτημα 2f
+-- Παραδοχή: Δεν υπάρχει οδηγός που να είναι άνω των 80 ετών
+
+WITH infringements_18_24 (birth_date,infringements_number) AS
+(
+SELECT EXTRACT(YEAR FROM infringement_date)-EXTRACT(YEAR FROM birth_date) AS age,COUNT(infringement_code) AS infringements_number
+FROM infringements NATURAL JOIN infringements_drivers NATURAL JOIN drivers_info
+WHERE (EXTRACT(YEAR FROM infringement_date)-EXTRACT(YEAR FROM birth_date)) >= 18 AND (EXTRACT(YEAR FROM infringement_date)-EXTRACT (YEAR FROM birth_date)) <= 24
+GROUP BY EXTRACT(YEAR FROM infringement_date)-EXTRACT(YEAR FROM birth_date)
+)
+,
+infringements_25_49 (birth_date,infringements_number) AS
+(
+SELECT EXTRACT(YEAR FROM infringement_date)-EXTRACT(YEAR FROM birth_date) AS age,COUNT(infringement_code) AS infringements_number
+FROM infringements NATURAL JOIN infringements_drivers NATURAL JOIN drivers_info
+WHERE (EXTRACT(YEAR FROM infringement_date)-EXTRACT(YEAR FROM birth_date)) >= 25 AND (EXTRACT(YEAR FROM infringement_date)-EXTRACT (YEAR FROM birth_date)) <= 49
+GROUP BY EXTRACT(YEAR FROM infringement_date)-EXTRACT(YEAR FROM birth_date)
+)
+,
+infringements_50_69 (birth_date,infringements_number) AS
+(
+SELECT EXTRACT(YEAR FROM infringement_date)-EXTRACT(YEAR FROM birth_date) AS age,COUNT(infringement_code) AS infringements_number
+FROM infringements NATURAL JOIN infringements_drivers NATURAL JOIN drivers_info
+WHERE (EXTRACT(YEAR FROM infringement_date)-EXTRACT(YEAR FROM birth_date)) >= 50 AND (EXTRACT(YEAR FROM infringement_date)-EXTRACT (YEAR FROM birth_date)) <= 69
+GROUP BY EXTRACT(YEAR FROM infringement_date)-EXTRACT(YEAR FROM birth_date)
+)
+,
+infringements_70plus (birth_date,infringements_number) AS
+(
+SELECT EXTRACT(YEAR FROM infringement_date)-EXTRACT(YEAR FROM birth_date) AS age,COUNT(infringement_code) AS infringements_number
+FROM infringements NATURAL JOIN infringements_drivers NATURAL JOIN drivers_info
+WHERE (EXTRACT(YEAR FROM infringement_date)-EXTRACT(YEAR FROM birth_date)) >= 70
+GROUP BY EXTRACT(YEAR FROM infringement_date)-EXTRACT(YEAR FROM birth_date)
+)
+
+(SELECT '18-24' AS age_group,CAST(SUM(infringements_number)/7 AS DECIMAL(10,2)) AS average_contracts
+FROM infringements_18_24)
+UNION
+(SELECT '25-49' AS age_group,CAST(SUM(infringements_number)/25 AS DECIMAL(10,2)) AS average_contracts
+FROM infringements_25_49)
+UNION
+(SELECT '50-69' AS age_group,CAST(SUM(infringements_number)/20 AS DECIMAL(10,2)) AS average_contracts
+FROM infringements_50_69)
+UNION
+(SELECT '70+' AS age_group,CAST(SUM(infringements_number)/11 AS DECIMAL(10,2)) AS average_contracts
+FROM infringements_70plus)

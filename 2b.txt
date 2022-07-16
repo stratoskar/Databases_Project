@@ -1,0 +1,10 @@
+-- Ερώτημα 2b
+-- Παραδοχή: Θεωρούμε ότι η τρέχουσα ημερομηνία είναι Ιούνιος του 2021 (06/2021)
+SELECT contract_code,phone_number1,phone_number2
+FROM contracts natural join clients natural join clients_info
+WHERE contract_code IN
+(
+    SELECT contract_code
+    FROM contracts
+    WHERE EXTRACT (YEAR FROM end_date)=2021 AND EXTRACT (MONTH FROM end_date)=7
+)

@@ -1,0 +1,5 @@
+-- Ερώτημα 2c
+SELECT COUNT(DISTINCT contract_code) AS number_of_contracts, insurance_category, EXTRACT (YEAR FROM start_date) AS contract_year
+FROM contracts
+WHERE EXTRACT (YEAR FROM start_date)>=2016 AND EXTRACT (YEAR FROM start_date)<=2020
+GROUP BY insurance_category,EXTRACT (YEAR FROM start_date)

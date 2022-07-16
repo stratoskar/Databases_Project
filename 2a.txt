@@ -1,0 +1,29 @@
+-- Ερώτημα 2a
+--Βρες όλους τους οδηγούς που σχετίζονται με συμβόλαια
+--τα οποία υπεγράφησαν τον τελευταίο μήνα
+(
+SELECT first_name,last_name,contract_code,'Driver' AS Category
+FROM contracts NATURAL JOIN drivers NATURAL JOIN drivers_info
+WHERE contract_code IN
+				-- Νέα συμβόλαια
+                (
+                    SELECT contract_code
+                    FROM contracts
+                    WHERE EXTRACT (YEAR FROM start_date)=(SELECT date_part('year',CURRENT_DATE)) AND EXTRACT (MONTH FROM start_date)=(SELECT date_part('month',CURRENT_DATE))
+                )
+ )
+UNION
+--Βρες όλους τους πελάτες που σχετίζονται με συμβόλαια
+-- τα οποία υπεγράφησαν τον τελευταίο μήνα
+(
+SELECT first_name,last_name,contract_code,'Client' AS Category
+FROM contracts NATURAL JOIN clients NATURAL JOIN clients_info
+WHERE contract_code IN
+				-- Νέα συμβόλαια
+                (
+                    SELECT contract_code
+                    FROM contracts
+                    WHERE EXTRACT (YEAR FROM start_date)=(SELECT date_part('year',CURRENT_DATE)) AND EXTRACT (MONTH FROM start_date)=(SELECT date_part('month',CURRENT_DATE))
+                )
+ )
+ORDER BY contract_code
